@@ -33,7 +33,7 @@ module.exports = {
 };
 
 // app.js
-const = shortcuts require('electron-shortcut-loader')('./shortcuts');
+const shortcuts = require('electron-shortcut-loader')('./shortcuts');
 
 app.on('ready', function () {
 	shortcuts.register();
