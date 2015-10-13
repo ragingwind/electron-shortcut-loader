@@ -1,4 +1,4 @@
-# electron-shortcut-loader [![Build Status](https://travis-ci.org/ragingwind/electron-shortcut-loader.svg?branch=master)](https://travis-ci.org/ragingwind/electron-shortcut-loader)
+# electron-shortcut-loader
 
 > Loading predefined shortcuts with events and options
 
