@@ -1,6 +1,6 @@
 {
   "name": "electron-shortcut-loader",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Loading predefined shortcuts with events and options",
   "license": "MIT",
   "repository": "ragingwind/electron-shortcut-loader",
