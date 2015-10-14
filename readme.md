@@ -71,6 +71,9 @@ Call `globalShortcut.unregister` in the method when you want
 
 Shortcuts file should exports json data with accelerator name and options. accelerator name is the key and options included `event` and `cmdOrCtrl`. Please refer to below code to make up.
 
+- `event`: event name which will be fired to `app` when Shortcut event has been fired
+- `cmdOrCtrl`: If your application is running on Windows or Linux? Command or Cmd will be changed to Control or Ctrl
+
 ```js
 // predefine shortcuts with events and options in shortcuts.js
 'use strict';
