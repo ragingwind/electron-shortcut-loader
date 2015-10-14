@@ -4,9 +4,12 @@ const path = require('path');
 const app = require('app');
 const globalShortcut = require('global-shortcut');
 
-function bindKeyEvent(e) {
+function bindKeyEvent(shortcut, event) {
 	return function() {
-		app.emit('shortcut-press', e);
+		app.emit('shortcut-press', {
+			shortcut: shortcut,
+			event: event
+		});
 	};
 }
 
@@ -38,7 +41,7 @@ function ShortcutLoader(input) {
 			}
 
 			this.shortcuts[s] = {
-				event: bindKeyEvent(s)
+				event: bindKeyEvent(s, opts.event)
 			};
 		}
 	}

@@ -44,7 +44,7 @@ app.on('will-quit', function () {
 });
 
 app.on('shortcut-press', function (e) {
-	console.log(e, 'key-event has been fired');
+	console.log(e.shortcut, e.event, 'key-event has been fired');
 });
 ```
 
@@ -90,6 +90,17 @@ module.exports = {
 		cmdOrCtrl: true
 	}
 };
+```
+
+## Event
+
+`app` should handle `shortcut-press` event. When the shortcut event has been fired, `event` object will be passed to the `app` event hander with event and shortcut information. see one of the examples.
+
+```js
+{
+	shortcut: 'Command+?',
+	event: 'toggle'
+}
 ```
 
 ## License
