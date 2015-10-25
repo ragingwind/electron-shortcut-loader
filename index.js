@@ -16,7 +16,7 @@ function bindKeyEvent(shortcut, event) {
 function ShortcutLoader(input) {
 	this.shortcuts = {};
 
-	const shortcuts = require(path.resolve(process.cwd(), input));
+	const shortcuts = require(path.resolve(app.getAppPath(), input));
 	if (!shortcuts) {
 		throw new Error('Shortcut input has been missing');
 	}
