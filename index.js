@@ -16,7 +16,10 @@ function bindKeyEvent(shortcut, event) {
 function ShortcutLoader(input) {
 	this.shortcuts = {};
 
-	const shortcuts = require(path.resolve(process.cwd(), input));
+	const pathOfModuleThatLoadedThis = path.dirname(module.parent.filename)
+	const pathToInput = path.resolve(pathOfModuleThatLoadedThis, input)
+	const shortcuts = require(pathToInput);
+	
 	if (!shortcuts) {
 		throw new Error('Shortcut input has been missing');
 	}
