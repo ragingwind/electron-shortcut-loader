@@ -2,6 +2,7 @@
 
 > Loading predefined shortcuts with events and options
 
+![](https://cloud.githubusercontent.com/assets/124117/11163454/1605df60-8b14-11e5-99b6-0ba3006528fb.png)
 
 ## Install
 
@@ -57,7 +58,7 @@ app.on('shortcut-press', function (e) {
 
 Type: `string`
 
-Path of shortcuts file which has sets of shortcuts json data, will be registered by `register` method
+Path of shortcuts file which has sets of shortcuts json data, will be registered by `register` method. __the path will be resolved with path of current module willing to import shortcuts.__
 
 ### register
 
@@ -104,6 +105,12 @@ module.exports = {
 	shortcut: 'Command+?',
 	event: 'toggle'
 }
+```
+
+## Run demo
+
+```
+$ npm install && npm start
 ```
 
 ## License
