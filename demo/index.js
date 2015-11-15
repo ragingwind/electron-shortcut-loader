@@ -31,10 +31,6 @@ function createMainWindow() {
 		}
 	});
 
-	shortcuts = require('../')('./shortcuts', {
-		autoRegister: autoRegister
-	});
-
 	win.loadUrl(`file://${__dirname}/index.html`);
 	win.on('closed', onClosed);
 
@@ -56,6 +52,23 @@ app.on('activate-with-no-open-windows', () => {
 app.on('ready', () => {
 	mainWindow = createMainWindow();
 
+	shortcuts = require('../')('./shortcuts', {
+		autoRegister: autoRegister
+	});
+
+	shortcuts.on('pressed', function (e) {
+		win.webContents.send('shortcut-pressed', e.event);
+		console.log(e.shortcut, e.event, 'key-event has been fired');
+	});
+
+	shortcuts.on('register', function () {
+		win.webContents.send('shortcut-status', 'register');
+	});
+
+	shortcuts.on('unregister', function () {
+		win.webContents.send('shortcut-status', 'unregister');
+	});
+
 	if (!autoRegister) {
 		shortcuts.register();
 	}
@@ -65,9 +78,4 @@ app.on('will-quit', function () {
 	if (!autoRegister) {
   	shortcuts.unregister();
 	}
-});
-
-app.on('shortcut-press', function (e) {
-	BrowserWindow.getFocusedWindow().webContents.send('shortcut', e.event);
-  console.log(e.shortcut, e.event, 'key-event has been fired');
 });

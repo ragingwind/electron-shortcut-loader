@@ -3,10 +3,12 @@
 const path = require('path');
 const app = require('app');
 const globalShortcut = require('global-shortcut');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
 
-function bindKeyEvent(shortcut, event) {
+function bindKeyEvent(emitter, shortcut, event) {
 	return function() {
-		app.emit('shortcut-press', {
+		emitter.emit('pressed', {
 			shortcut: shortcut,
 			event: event
 		});
@@ -42,7 +44,7 @@ function ShortcutLoader(input, opts) {
 			}
 
 			this.shortcuts[s] = {
-				event: bindKeyEvent(s, shortcut.event)
+				event: bindKeyEvent(this, s, shortcut.event)
 			};
 		}
 	}
@@ -51,11 +53,9 @@ function ShortcutLoader(input, opts) {
 	if (opts.autoRegister) {
 		const _this = this;
 
-		app.on('ready', () => {
-			_this.register();
-		});
-
 		app.on('browser-window-focus', (e, win) => {
+			console.log('register');
+
 			_this.register();
 		});
 
@@ -67,6 +67,8 @@ function ShortcutLoader(input, opts) {
 	return this;
 }
 
+util.inherits(ShortcutLoader, EventEmitter);
+
 ShortcutLoader.prototype.register = function () {
 	for (const s in this.shortcuts) {
 		if (this.shortcuts.hasOwnProperty(s)) {
@@ -77,6 +79,8 @@ ShortcutLoader.prototype.register = function () {
 			globalShortcut.register(s, this.shortcuts[s].event);
 		}
 	}
+
+	this.emit('register');
 };
 
 ShortcutLoader.prototype.unregister = function () {
@@ -87,6 +91,8 @@ ShortcutLoader.prototype.unregister = function () {
 			}
 		}
 	}
+
+	this.emit('unregister');
 };
 
 module.exports = function (input, opts) {

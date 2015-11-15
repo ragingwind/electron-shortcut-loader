@@ -44,9 +44,13 @@ app.on('will-quit', function () {
 	shortcuts.unregister();
 });
 
-app.on('shortcut-press', function (e) {
+shortcuts.on('pressed', function (e) {
 	console.log(e.shortcut, e.event, 'key-event has been fired');
 });
+
+shortcuts.on('register', function (e) {});
+
+shortcuts.on('unregister', function (e) {});
 ```
 
 
@@ -62,15 +66,15 @@ Path of shortcuts file which has sets of shortcuts json data, will be registered
 
 #### options
 
-- `autoRegister`: Auto un/register shortcuts on application has focus.
+- `autoRegister`: Auto un/register shortcuts on application has focus. You don't need to manage registering of shortcuts in manually on focus of app.
 
 ### register
 
-Call `globalShortcut.register` in the method with shortcuts loaded from shortcuts file
+Call `globalShortcut.register` in the method with shortcuts loaded from shortcuts file.
 
 ### unregister
 
-Call `globalShortcut.unregister` in the method when you want
+Call `globalShortcut.unregister` in the method when you want.
 
 ## Structure of shortcuts
 
@@ -102,7 +106,9 @@ module.exports = {
 
 ## Event
 
-`app` should handle `shortcut-press` event. When the shortcut event has been fired, `event` object will be passed to the `app` event hander with event and shortcut information. see one of the examples.
+### pressed
+
+Specific shortcut key has been pressed, event will be fired. `event` object will be passed to ~~the `app`~~ event listeners with event and shortcut information. see one of the examples.
 
 ```js
 {
@@ -110,6 +116,10 @@ module.exports = {
 	event: 'toggle'
 }
 ```
+
+### un/register
+
+The event will be fired on un/register shortcuts to global.
 
 ## Run demo
 
