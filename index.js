@@ -13,26 +13,27 @@ function bindKeyEvent(shortcut, event) {
 	};
 }
 
-function ShortcutLoader(input) {
-	this.shortcuts = {};
+function ShortcutLoader(input, opts) {
+	opts = opts || {};
 
 	const shortcuts = require(path.resolve(path.dirname(module.parent.filename), input));
 	if (!shortcuts) {
 		throw new Error('Shortcut input has been missing');
 	}
 
+	// init with shortcuts
+	this.shortcuts = {};
+
 	for (let s in shortcuts) {
 		if (shortcuts.hasOwnProperty(s)) {
 			// check options was given
-			const opts = shortcuts[s];
-			if (!opts.event) {
+			const shortcut = shortcuts[s];
+			if (!shortcut.event) {
 				throw new Error('Shortcust has no event');
-			} else {
-
 			}
 
 			// change accelerator according to platform
-			if (opts.cmdOrCtrl && process.platform !== 'darwin') {
+			if (shortcut.cmdOrCtrl && process.platform !== 'darwin') {
 				if (/Command\+/i.test(s)) {
 					s = s.replace(/Command/i, 'Control');
 				} else if (/Cmd\+/i.test(s)) {
@@ -41,9 +42,26 @@ function ShortcutLoader(input) {
 			}
 
 			this.shortcuts[s] = {
-				event: bindKeyEvent(s, opts.event)
+				event: bindKeyEvent(s, shortcut.event)
 			};
 		}
+	}
+
+	// bind focus event for autoRegister
+	if (opts.autoRegister) {
+		const _this = this;
+
+		app.on('ready', () => {
+			_this.register();
+		});
+
+		app.on('browser-window-focus', (e, win) => {
+			_this.register();
+		});
+
+		app.on('browser-window-blur', (e, win) => {
+			_this.unregister();
+		});
 	}
 
 	return this;
@@ -71,6 +89,6 @@ ShortcutLoader.prototype.unregister = function () {
 	}
 };
 
-module.exports = function (input) {
-	return new ShortcutLoader(input);
+module.exports = function (input, opts) {
+	return new ShortcutLoader(input, opts);
 };

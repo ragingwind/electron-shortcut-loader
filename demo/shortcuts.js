@@ -7,7 +7,7 @@ module.exports = {
         event: 'Command+I',
         cmdOrCtrl: true
     },
-    'Command+R': {
-        event: 'Command+R'
+    'Command+E': {
+        event: 'Command+E'
     }
 };

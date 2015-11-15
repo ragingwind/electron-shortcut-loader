@@ -2,7 +2,6 @@
 const app = require('app');
 const path = require('path');
 const BrowserWindow = require('browser-window');
-const shortcuts = require('../')('./shortcuts');
 
 // report crashes to the Electron project
 require('crash-reporter').start();
@@ -20,6 +19,8 @@ function onClosed() {
 }
 
 var win;
+var shortcuts;
+const autoRegister = true;
 
 function createMainWindow() {
 	 win = new BrowserWindow({
@@ -28,6 +29,10 @@ function createMainWindow() {
 		'web-preferences' : {
 			'preload': path.join(__dirname, 'browser.js')
 		}
+	});
+
+	shortcuts = require('../')('./shortcuts', {
+		autoRegister: autoRegister
 	});
 
 	win.loadUrl(`file://${__dirname}/index.html`);
@@ -51,11 +56,15 @@ app.on('activate-with-no-open-windows', () => {
 app.on('ready', () => {
 	mainWindow = createMainWindow();
 
-	shortcuts.register();
+	if (!autoRegister) {
+		shortcuts.register();
+	}
 });
 
 app.on('will-quit', function () {
-    shortcuts.unregister();
+	if (!autoRegister) {
+  	shortcuts.unregister();
+	}
 });
 
 app.on('shortcut-press', function (e) {

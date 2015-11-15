@@ -52,13 +52,17 @@ app.on('shortcut-press', function (e) {
 
 ## API
 
-### electronHotkeyLoader(input)
+### electronHotkeyLoader(input, options)
 
 #### input
 
 Type: `string`
 
 Path of shortcuts file which has sets of shortcuts json data, will be registered by `register` method. __the path will be resolved with path of current module willing to import shortcuts.__
+
+#### options
+
+- `autoRegister`: Auto un/register shortcuts on application has focus.
 
 ### register
 
