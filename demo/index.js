@@ -20,7 +20,9 @@ function onClosed() {
 
 var win;
 var shortcuts;
+
 const autoRegister = true;
+const cmdOrCtrl = true;
 
 function createMainWindow() {
 	 win = new BrowserWindow({
@@ -53,7 +55,8 @@ app.on('ready', () => {
 	mainWindow = createMainWindow();
 
 	shortcuts = require('../')('./shortcuts', {
-		autoRegister: autoRegister
+		autoRegister: autoRegister,
+		cmdOrCtrl: cmdOrCtrl
 	});
 
 	shortcuts.on('pressed', function (e) {

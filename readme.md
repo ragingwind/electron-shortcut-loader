@@ -34,7 +34,10 @@ module.exports = {
 };
 
 // app.js
-const shortcuts = require('electron-shortcut-loader')('./shortcuts');
+const shortcuts = require('electron-shortcut-loader')('./shortcuts', {
+	autoRegister: true,
+	cmdOrCtrl: true
+});
 
 app.on('ready', function () {
 	shortcuts.register();
@@ -67,6 +70,7 @@ Path of shortcuts file which has sets of shortcuts json data, will be registered
 #### options
 
 - `autoRegister`: Auto un/register shortcuts on application has focus. You don't need to manage registering of shortcuts in manually on focus of app.
+- `cmdOrCtrl`: If your application is running on Windows or Linux? All events of Command or Cmd will be changed into Control or Ctrl
 
 ### register
 

@@ -35,7 +35,7 @@ function ShortcutLoader(input, opts) {
 			}
 
 			// change accelerator according to platform
-			if (shortcut.cmdOrCtrl && process.platform !== 'darwin') {
+			if ((opts.cmdOrCtrl || shortcut.cmdOrCtrl) && process.platform !== 'darwin') {
 				if (/Command\+/i.test(s)) {
 					s = s.replace(/Command/i, 'Control');
 				} else if (/Cmd\+/i.test(s)) {
