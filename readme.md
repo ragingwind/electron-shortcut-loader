@@ -30,6 +30,13 @@ module.exports = {
 	'Command+?': {
 		event: 'focus',
 		cmdOrCtrl: true
+	},
+	'Command+0': {
+		// event obect
+		event: {
+			name: 'direct-event'
+		},
+		cmdOrCtrl: true
 	}
 };
 

@@ -54,8 +54,6 @@ function ShortcutLoader(input, opts) {
 		const _this = this;
 
 		app.on('browser-window-focus', (e, win) => {
-			console.log('register');
-
 			_this.register();
 		});
 
