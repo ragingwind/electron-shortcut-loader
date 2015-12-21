@@ -2,9 +2,14 @@
 const app = require('app');
 const path = require('path');
 const BrowserWindow = require('browser-window');
+const ShortcutLoader = require('../');
+const EventEmitter = require('events');
 
 // report crashes to the Electron project
-require('crash-reporter').start();
+require('crash-reporter').start({
+	companyName: 'github.com/ragingwind',
+	submitURL: 'http://github.com/ragingwind/electron-shortcut-loader'
+});
 
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
@@ -18,25 +23,32 @@ function onClosed() {
 	mainWindow = null;
 }
 
-var win;
-var shortcuts;
+class ShortcutEventHandler extends EventEmitter {
+}
 
-const autoRegister = true;
-const cmdOrCtrl = true;
+let win;
+let loaderWith;
+let loaderWithJSON;
+const shorcutHandler = new ShortcutEventHandler();
 
 function createMainWindow() {
-	 win = new BrowserWindow({
+	win = new BrowserWindow({
 		width: 640,
 		height: 480,
-		'web-preferences' : {
+		webPreferences: {
 			'preload': path.join(__dirname, 'browser.js')
 		}
 	});
 
-	win.loadUrl(`file://${__dirname}/index.html`);
+	win.loadURL(`file://${__dirname}/index.html`);
 	win.on('closed', onClosed);
 
 	return win;
+}
+
+function sendEventToBroser(key, event, from) {
+	win.webContents.send('shortcut-pressed', `${event} by key: ${key}`);
+	win.webContents.send('shortcut-status', `${event} has been fired from ${from}`);
 }
 
 app.on('window-all-closed', () => {
@@ -54,31 +66,49 @@ app.on('activate-with-no-open-windows', () => {
 app.on('ready', () => {
 	mainWindow = createMainWindow();
 
-	shortcuts = require('../')('./shortcuts', {
-		autoRegister: autoRegister,
-		cmdOrCtrl: cmdOrCtrl
+	// register in manually and using handle event coming from EventEmitter
+	ShortcutLoader.load('./shortcuts-app-handler', {});
+
+	loaderWith = new ShortcutLoader();
+	loaderWith.load('./shortcuts-cb-handler', {
+		autoRegister: false,
+		cmdOrCtrl: true
+	}, e => {
+		sendEventToBroser(e.shortcut, e.event, 'Global anonymous event handler');
 	});
 
-	shortcuts.on('pressed', function (e) {
-		win.webContents.send('shortcut-pressed', e.event);
-		console.log(e.shortcut, e.event, 'key-event has been fired');
-	});
+	// register in manually
+	loaderWith.register();
 
-	shortcuts.on('register', function () {
-		win.webContents.send('shortcut-status', 'register');
-	});
+	// register with JSON data
+	loaderWithJSON = new ShortcutLoader();
+	loaderWithJSON.load({
+		'Command+6': {
+			event: 'Command+6'
+		},
+		'Command+7': {
+			event: 'Command+7'
+		},
+		'Command+8': {
+			event: e => {
+				sendEventToBroser(e.shortcut, e.event, 'Local anonymous event handler');
+			}
+		}
+	}, shorcutHandler);
 
-	shortcuts.on('unregister', function () {
-		win.webContents.send('shortcut-status', 'unregister');
+	shorcutHandler.on('shortcut-pressed', e => {
+		sendEventToBroser(e.shortcut, e.event, 'ShortcutLoader event handler');
 	});
-
-	if (!autoRegister) {
-		shortcuts.register();
-	}
 });
 
-app.on('will-quit', function () {
-	if (!autoRegister) {
-  	shortcuts.unregister();
-	}
+app.on('will-quit', () => {
+	loaderWith.unregister();
+});
+
+app.on('shortcut-pressed', e => {
+	sendEventToBroser(e.shortcut, e.event, 'app event handler');
+});
+
+app.on('Command+3', e => {
+	sendEventToBroser(e.shortcut, e.event, 'own event handler with app');
 });

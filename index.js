@@ -1,98 +1,124 @@
 'use strict';
 
 const path = require('path');
-const app = require('app');
-const globalShortcut = require('global-shortcut');
-const EventEmitter = require('events').EventEmitter;
-const util = require('util');
+const EventEmitter = require('events');
+const oassign = require('object-assign');
+const Shortcut = require('electron-shortcut').Shortcut;
 
-function bindKeyEvent(emitter, shortcut, event) {
-	return function() {
-		emitter.emit('pressed', {
-			shortcut: shortcut,
-			event: event
-		});
+module.exports = {};
+
+function createShortcut(e, opts) {
+	let handler;
+	if (typeof opts.event === 'function') {
+		handler = function () {
+			opts.event({
+				shortcut: e,
+				event: e
+			});
+		};
+	} else if (typeof opts.handler === 'function') {
+		handler = function () {
+			opts.handler({
+				shortcut: e,
+				event: e
+			});
+		};
+	} else {
+		handler = function () {
+			(opts.handler || require('app')).emit('shortcut-pressed', {
+				shortcut: e,
+				event: opts.event || e
+			});
+		};
+	}
+
+	return new Shortcut(e, opts, handler);
+}
+
+function isHandler(h) {
+	return (typeof h === 'function' || h instanceof EventEmitter);
+}
+
+class ShortcutLoader {
+	constructor() {
+		this._shortcuts = [];
+	}
+
+	load(input, opts, handler) {
+		if (isHandler(opts)) {
+			handler = opts;
+			opts = {};
+		}
+
+		if (handler && !isHandler(handler)) {
+			throw new TypeError('Type of event handler is invalid');
+		}
+
+		opts = oassign({}, opts);
+
+		if (typeof input === 'string') {
+			input = require(path.resolve(path.dirname(module.parent.filename), input));
+		}
+
+		if (!input) {
+			throw new TypeError('Loading failed for shortcut data');
+		}
+
+		// clear before load if it is exist
+		if (this._shortcuts.length > 0) {
+			this.unregister();
+			this._shortcuts = [];
+		}
+
+		// register bunch of shortcuts with handler and options
+		for (const s of Object.keys(input)) {
+			this._shortcuts.push(createShortcut(s, oassign(input[s], opts, {
+				handler
+			})));
+		}
+
+		return this;
+	}
+
+	register() {
+		for (const event of Object.keys(this._shortcuts)) {
+			this._shortcuts[event].register();
+		}
+
+		return this;
+	}
+
+	unregister() {
+		for (const event of Object.keys(this._shortcuts)) {
+			this._shortcuts[event].unregister();
+		}
+
+		return this;
+	}
+}
+
+module.exports = (function () {
+	let _loader = null;
+
+	ShortcutLoader.load = (input, opts, handler) => {
+		if (!_loader) {
+			_loader = new ShortcutLoader();
+		}
+
+		return _loader.load(input, opts, handler);
 	};
-}
 
-function ShortcutLoader(input, opts) {
-	opts = opts || {};
-
-	const shortcuts = require(path.resolve(path.dirname(module.parent.filename), input));
-	if (!shortcuts) {
-		throw new Error('Shortcut input has been missing');
-	}
-
-	// init with shortcuts
-	this.shortcuts = {};
-
-	for (let s in shortcuts) {
-		if (shortcuts.hasOwnProperty(s)) {
-			// check options was given
-			const shortcut = shortcuts[s];
-			if (!shortcut.event) {
-				throw new Error('Shortcust has no event');
-			}
-
-			// change accelerator according to platform
-			if ((opts.cmdOrCtrl || shortcut.cmdOrCtrl) && process.platform !== 'darwin') {
-				if (/Command\+/i.test(s)) {
-					s = s.replace(/Command/i, 'Control');
-				} else if (/Cmd\+/i.test(s)) {
-					s = s.replace(/Cmd/i, 'Ctrl');
-				}
-			}
-
-			this.shortcuts[s] = {
-				event: bindKeyEvent(this, s, shortcut.event)
-			};
+	ShortcutLoader.register = () => {
+		if (_loader) {
+			_loader.register();
 		}
-	}
+	};
 
-	// bind focus event for autoRegister
-	if (opts.autoRegister) {
-		const _this = this;
-
-		app.on('browser-window-focus', (e, win) => {
-			_this.register();
-		});
-
-		app.on('browser-window-blur', (e, win) => {
-			_this.unregister();
-		});
-	}
-
-	return this;
-}
-
-util.inherits(ShortcutLoader, EventEmitter);
-
-ShortcutLoader.prototype.register = function () {
-	for (const s in this.shortcuts) {
-		if (this.shortcuts.hasOwnProperty(s)) {
-			if (globalShortcut.isRegistered(s)) {
-				console.warn(s + ' is already registered');
-			}
-
-			globalShortcut.register(s, this.shortcuts[s].event);
+	ShortcutLoader.unregister = () => {
+		if (_loader) {
+			_loader.unregister();
 		}
-	}
+	};
 
-	this.emit('register');
-};
-
-ShortcutLoader.prototype.unregister = function () {
-	for (const s in this.shortcuts) {
-		if (this.shortcuts.hasOwnProperty(s)) {
-			if (globalShortcut.isRegistered(s)) {
-				globalShortcut.unregister(s, this.shortcuts[s].event);
-			}
-		}
-	}
-
-	this.emit('unregister');
-};
-
-module.exports = function (input, opts) {
-	return new ShortcutLoader(input, opts);
-};
+	return ShortcutLoader;
+})();

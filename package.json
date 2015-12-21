@@ -1,7 +1,7 @@
 {
   "name": "electron-shortcut-loader",
   "version": "0.3.0",
-  "description": "Loading predefined shortcuts with events and options",
+  "description": "Loading pre-defined shortcuts with custom events and more options",
   "license": "MIT",
   "repository": "ragingwind/electron-shortcut-loader",
   "author": {
@@ -13,7 +13,7 @@
     "node": ">=4"
   },
   "scripts": {
-    "test": "xo && ava",
+    "test": "xo",
     "start": "electron ./demo"
   },
   "files": [
@@ -21,20 +21,25 @@
   ],
   "keywords": [
     "electron",
+    "shortcut",
     "electron-shortcut",
     "electron-shortcut-loader"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "electron-shortcut": "^0.4.1",
+    "object-assign": "^4.0.1"
+  },
   "devDependencies": {
-    "xo": "^0.7.1",
     "electron-debug": "^0.2.1",
-    "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.34.0"
+    "electron-packager": "^5.2.0",
+    "electron-prebuilt": "^0.36.1",
+    "xo": "^0.7.1"
   },
   "xo": {
     "esnext": true,
     "envs": [
-      "node"
+      "node",
+      "browser"
     ]
   },
   "jshintConfig": {
